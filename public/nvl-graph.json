@@ -1,0 +1,33 @@
+{
+    "nodes": [
+        {
+            "id": "1",
+            "captions": [{ "value": "Concept 1" }],
+            "properties": {
+                "concept_id": "1",
+                "concept_name": "Test Concept 1",
+                "domain_id": "Measurement"
+            }
+        },
+        {
+            "id": "2",
+            "captions": [{ "value": "Concept 2" }],
+            "properties": {
+                "concept_id": "2",
+                "concept_name": "Test Concept 2",
+                "domain_id": "Measurement"
+            }
+        }
+    ],
+    "relationships": [
+        {
+            "id": "1-2",
+            "from": "1",
+            "to": "2",
+            "captions": [{ "value": "Maps to" }],
+            "properties": {
+                "relationship_id": "Maps to"
+            }
+        }
+    ]
+}
