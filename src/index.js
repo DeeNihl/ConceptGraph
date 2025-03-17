@@ -1,6 +1,7 @@
 import { NVL } from '@neo4j-nvl/base'
 import { ZoomInteraction, PanInteraction } from '@neo4j-nvl/interaction-handlers'
 
+import { DragNodeInteraction } from '@neo4j-nvl/interaction-handlers'
 // Get DOM elements
 // check in
 const container = document.getElementById('container')
@@ -13,12 +14,20 @@ const nvlConfig = {
     initialZoom: 1,
     style: {
         node: {
-            color: '#4CAF50',
-            radius: 40,
-            fontSize: 14,
+            color: (nodeData) => {
+                if (nodeData.properties.vocabulary === 'UCUM') {
+                    return '#003366';
+                } else if (nodeData.properties.vocabulary === 'CIBMTR-FDM' && nodeData.properties.conceptClass === 'Option') {
+                    return '#449933';
+                } else {
+                    return '#FF69B4'; // Default color
+                }
+            },
+            radius: 60,
+            fontSize: 12,
             fontColor: '#000000',
             borderWidth: 2,
-            borderColor: '#2E7D32'
+            borderColor: '#1B03A3'
         },
         relationship: {
             width: 2,
@@ -44,13 +53,52 @@ const nvlConfig = {
 // Initialize NVL with test data
 const testNodes = [
     {
-        id: 'test1',
-        captions: [{ value: 'Test Node 1' }],
+        id: 'legend-CDE',
+        captions: [{ value: 'caDSR CDE' }],
+        color: '#a8571d',
         properties: { type: 'test' }
     },
     {
-        id: 'test2',
-        captions: [{ value: 'Test Node 2' }],
+        id: 'legend-LOINC',
+        captions: [{ value: 'LOINC' }],
+        color: '#1da89d',
+        properties: { type: 'test' }
+    },
+    {
+        id: 'legend-RxNorm',
+        captions: [{ value: 'RxNorm' }],
+        color: '#91dfed',
+        properties: { type: 'test' }
+    },
+    {
+        id: 'legend-UCUM',
+        captions: [{ value: 'UCUM' }],
+        color: '#a88f1d',
+        properties: { type: 'test' }
+    },
+    {
+        id: 'legend-Map',
+        captions: [{ value: 'DTE Map' }],
+        color: '#29a81d',
+        size:45,
+        properties: { type: 'test' }
+    },
+    {
+        id: 'legend-DDC',
+        captions: [{ value: 'DDC' }],
+        color: '#1d4ea8',
+        properties: { type: 'test' }
+    },
+    {
+        id: 'legend-OptionGroup',
+        captions: [{ value: 'Option Group' }],
+        color: '#a11da8',
+        properties: { type: 'test' }
+    },
+    {
+        id: 'legend-Option',
+        captions: [{ value: 'Option' }],
+        color: '#e991ed',
         properties: { type: 'test' }
     }
 ]
@@ -58,16 +106,58 @@ const testNodes = [
 const testRelationships = [
     {
         id: 'rel1',
-        from: 'test1',
-        to: 'test2',
-        captions: [{ value: 'Test Relationship' }],
+        from: 'legend-Map',
+        to: 'legend-CDE',
+        captions: [{ value: 'Has NumericValue CDE' }],
         properties: { type: 'test' }
-    }
+    },
+    {
+        id: 'rel10',
+        from: 'legend-Map',
+        to: 'legend-LOINC',
+        captions: [{ value: 'Has LOINC' }],
+        properties: { type: 'test' }
+    },
+    {
+        id: 'rel11',
+        from: 'legend-Map',
+        to: 'legend-RxNorm',
+        captions: [{ value: 'Has RxNorm' }],
+        properties: { type: 'test' }
+    },
+    {
+        id: 'rel2',
+        from: 'legend-CDE',
+        to: 'legend-DDC',
+        captions: [{ value: 'Equals FDM DDC' }],
+        properties: { type: 'test' }
+    },
+    {
+        id: 'rel3',
+        from: 'legend-DDC',
+        to: 'legend-OptionGroup',
+        captions: [{ value: 'Has FDM-OptionGroup' }],
+        properties: { type: 'test' }
+    },
+    {
+        id: 'rel4',
+        from: 'legend-OptionGroup',
+        to: 'legend-Option',
+        captions: [{ value: 'Contains FDM-Option' }],
+        properties: { type: 'test' }
+    },    
+    {
+        id: 'rel5',
+        from: 'legend-Option',
+        to: 'legend-UCUM',
+        captions: [{ value: 'FDM-Option equals' }],
+        properties: { type: 'test' }
+    } 
 ]
 
 // Initialize NVL with test data
 const nvl = new NVL(container, testNodes, testRelationships, nvlConfig)
-
+const dragNodeInteraction = new DragNodeInteraction(nvl)
 // Add interactions
 new ZoomInteraction(nvl)
 new PanInteraction(nvl)
@@ -118,6 +208,32 @@ async function fetchConcepts() {
         const data = await response.json()
         console.log('Graph data loaded:', data)
 
+        //GEMINI: update the node color for node in data based on the rules below
+        /*
+        if  the node .properties.vocabulary === 'UCUM' then color should be '#a88f1d'
+        if  the node .properties.vocabulary === 'CIBMTR-DTE' then color should be '#32a852'
+        if  the node .properties.vocabulary === 'CIBMTR-FDM' and node .properties.conceptClass = 'Option' then color should be '#1B03A3'
+        if  the node .properties.vocabulary === 'CIBMTR-FDM' and node .properties.conceptClass = 'OptionGroup' then color should be '#4603a3'
+        if  the node .properties.vocabulary === 'CIBMTR-FDM' and node .properties.conceptClass = 'DDC'  then color should be '#1d4ea8'
+        if  the node .properties.vocabulary === 'CIBMTR-caDSR' and node .properties.conceptClass = 'CDE'  then color should be '#a8571d'
+        */
+        data.nodes.forEach(node => {
+            if (node.properties.vocabulary === 'UCUM') {
+                node.color = '#a88f1d';
+            } else if (node.properties.vocabulary === 'CIBMTR-DTE') {
+                node.color = '#29a81d';
+            } else if (node.properties.vocabulary === 'RxNorm') {
+                node.color = '#91dfed';
+            } else if (node.properties.vocabulary === 'CIBMTR-FDM' && node.properties.conceptClass === 'Option') {
+                node.color = '#e991ed';
+            } else if (node.properties.vocabulary === 'CIBMTR-FDM' && node.properties.conceptClass === 'OptionGroup') {
+                node.color = '#a11da8';
+            } else if (node.properties.vocabulary === 'CIBMTR-FDM' && node.properties.conceptClass === 'DDC') {
+                node.color = '#1d4ea8';
+            } else if (node.properties.vocabulary === 'CIBMTR-caDSR' && node.properties.conceptClass === 'CDE') {
+                node.color = '#a8571d';
+            }
+        });
         // Update the graph
         nvl.addAndUpdateElementsInGraph(
             data.nodes,
@@ -144,4 +260,46 @@ conceptInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         fetchConcepts()
     }
+    if (event.key === '/') {
+        nvl.deselectAll();
+    }
+    if (event.key === '=') {
+        nvl.deselectAll();
+    }
+    if (event.key === 'p') {
+        nvl.saveFullGraphToLargeFile();
+    }
+})
+
+container.addEventListener('keypress', (event) => {
+    if (event.key === '/') {
+        nvl.deselectAll();
+    }
+    if (event.key === ' ') {
+        selnodes= nvl.getSelectedNodes();
+        selnodes.forEach(node => {{nvl.pinNode(node.id)}})
+    }
+    if (event.key === 'p') {
+        nvl.saveFullGraphToLargeFile();
+    }
+})
+
+container.addEventListener('click', (e) => {
+    const { nvlTargets } = nvl.getHits(e)
+    if (nvlTargets.nodes.length > 0) {
+      if(nvlTargets.nodes[0].selected===true){
+        nvl.addAndUpdateElementsInGraph([{ id: nvlTargets.nodes[0].data.id, selected: false }], [])      
+        } else{
+        nvl.addAndUpdateElementsInGraph([{ id: nvlTargets.nodes[0].data.id, selected: true }], [])
+      }
+    } else {
+        nvl.addAndUpdateElementsInGraph([{ id: nvlTargets.nodes[0].data.id, selected: false }], []) 
+        
+    }
+})
+
+
+
+dragNodeInteraction.updateCallback('onDrag', (nodes) => {
+  console.log('Dragged nodes:', nodes)
 })

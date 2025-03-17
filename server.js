@@ -9,7 +9,7 @@ app.use(express.json())
 // Database connection configuration
 const dbConfig = {
     user: 'postgres',
-    host: 'localhost',
+    host: '127.0.0.1',
     database: 'postgres',
     password: 'mypass',
     port: 5432
