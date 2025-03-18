@@ -1,6 +1,6 @@
 import { NVL } from '@neo4j-nvl/base'
 import { ZoomInteraction, PanInteraction } from '@neo4j-nvl/interaction-handlers'
-
+import { ClickInteraction } from '@neo4j-nvl/interaction-handlers'
 import { DragNodeInteraction } from '@neo4j-nvl/interaction-handlers'
 // Get DOM elements
 // check in
@@ -8,21 +8,18 @@ const container = document.getElementById('container')
 const conceptInput = document.getElementById('concept-input')
 const fetchButton = document.getElementById('fetch-button')
 const loadingIndicator = document.getElementById('loading-indicator')
+const nodeConceptId = document.getElementById('node-concept-id')
+const nodeVocabulary = document.getElementById('node-concept-vocabulary')
+const nodeDomain = document.getElementById('node-concept-domain')
+const nodeConceptClass = document.getElementById('node-concept-class')
+const nodeConceptName = document.getElementById('node-concept-name')
+const nodeConceptCode = document.getElementById('node-concept-code')
 
 // Configure NVL instance
 const nvlConfig = {
     initialZoom: 1,
     style: {
         node: {
-            color: (nodeData) => {
-                if (nodeData.properties.vocabulary === 'UCUM') {
-                    return '#003366';
-                } else if (nodeData.properties.vocabulary === 'CIBMTR-FDM' && nodeData.properties.conceptClass === 'Option') {
-                    return '#449933';
-                } else {
-                    return '#FF69B4'; // Default color
-                }
-            },
             radius: 60,
             fontSize: 12,
             fontColor: '#000000',
@@ -158,6 +155,7 @@ const testRelationships = [
 // Initialize NVL with test data
 const nvl = new NVL(container, testNodes, testRelationships, nvlConfig)
 const dragNodeInteraction = new DragNodeInteraction(nvl)
+const clickInteraction = new ClickInteraction(nvl)
 // Add interactions
 new ZoomInteraction(nvl)
 new PanInteraction(nvl)
@@ -270,9 +268,9 @@ conceptInput.addEventListener('keypress', (event) => {
         nvl.saveFullGraphToLargeFile();
     }
 })
-
-container.addEventListener('keypress', (event) => {
-    if (event.key === '/') {
+/*
+div.addEventListener('keypress', (event) => {
+    if (event.key === 'q') {
         nvl.deselectAll();
     }
     if (event.key === ' ') {
@@ -298,7 +296,28 @@ container.addEventListener('click', (e) => {
     }
 })
 
-
+*/
+clickInteraction.updateCallback('onNodeClick', (node) => {
+    console.log('Node clicked', node);
+    var desel=0;
+    const nodes=[node];
+    const selectedNodes= nvl.getSelectedNodes();
+    selectedNodes.forEach(inode => {
+        if (inode.id === node.id){
+          nvl.addAndUpdateElementsInGraph([{ id: nodes[0].id, selected: false }], []);
+          desel=1;
+        }  
+    });
+    if(desel===0){
+        nvl.addAndUpdateElementsInGraph([{ id: nodes[0].id, selected: true }], []);
+    }
+    nodeConceptName.value=node.captions[0].value;
+    nodeConceptId.value=node.id;
+    //nodeConceptCode.value=node.properties.vocabulary;
+    nodeVocabulary.value=node.properties.vocabulary;
+    nodeDomain.value=node.properties.domain;
+    nodeConceptClass.value=node.properties.conceptClass;
+})
 
 dragNodeInteraction.updateCallback('onDrag', (nodes) => {
   console.log('Dragged nodes:', nodes)

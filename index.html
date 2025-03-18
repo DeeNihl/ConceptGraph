@@ -15,7 +15,7 @@
             width: 100%;
             height: calc(100vh - 60px);
             position: absolute;
-            top: 60px;
+            top: 180px;
             left: 0;
             background: #f8f9fa;
         }
@@ -24,7 +24,7 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 60px;
+            height: 80px;
             background: white;
             border-bottom: 1px solid #e0e0e0;
             display: flex;
@@ -33,6 +33,20 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             z-index: 1000;
         }
+        #detail-frame {
+        position: fixed;
+        top: 82px;
+        left: 0;
+        right: 0;
+        height: 30px;
+        background: white;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
         #concept-input {
             flex-grow: 1;
             margin-right: 10px;
@@ -66,9 +80,20 @@
 </head>
 <body>
     <div id="search-bar">
+    
         <input type="text" id="concept-input" placeholder="Enter concept IDs (comma-separated)" />
         <button id="fetch-button">Fetch Concepts</button>
         <span id="loading-indicator">Loading...</span>
+    </div>
+
+    <div id="detail-frame">
+        <input type="text" id="node-concept-id" placeholder="Cool Concept Id" />
+        <input type="text" id="node-concept-vocabulary" placeholder="Cool Vocab" />
+        <input type="text" id="node-concept-domain" placeholder="Cool Concept Domain" />
+        <input type="text" id="node-concept-class" placeholder="Cool Concept Class" />
+        <input type="text" id="node-concept-name" placeholder="Cool Concept Name" />
+        <input type="text" id="node-concept-code" placeholder="Cool Concept Code" />
+        
     </div>
     <div id="container"></div>
     <script type="module" src="./src/index.js"></script>
