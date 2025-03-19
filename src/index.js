@@ -313,7 +313,7 @@ clickInteraction.updateCallback('onNodeClick', (node) => {
     }
     nodeConceptName.value=node.captions[0].value;
     nodeConceptId.value=node.id;
-    //nodeConceptCode.value=node.properties.vocabulary;
+    nodeConceptCode.value=node.properties.conceptCode || '';
     nodeVocabulary.value=node.properties.vocabulary;
     nodeDomain.value=node.properties.domain;
     nodeConceptClass.value=node.properties.conceptClass;

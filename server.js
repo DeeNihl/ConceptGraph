@@ -60,7 +60,7 @@ app.post('/api/fetch-concepts', async (req, res) => {
         try {
             // First, get the concepts
             const conceptQuery = `
-                SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept
+                SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code
                 FROM omop_vocab.concept
                 WHERE concept_id = ANY($1)
             `
@@ -91,7 +91,7 @@ app.post('/api/fetch-concepts', async (req, res) => {
             if (relatedConceptIds.length > 0) {
                 console.log('Fetching related concepts:', relatedConceptIds)
                 const relatedConceptsQuery = `
-                    SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept
+                    SELECT concept_id, concept_name, domain_id, vocabulary_id, concept_class_id, standard_concept, concept_code
                     FROM omop_vocab.concept
                     WHERE concept_id = ANY($1)
                 `
@@ -111,7 +111,8 @@ app.post('/api/fetch-concepts', async (req, res) => {
                     domain: row.domain_id,
                     vocabulary: row.vocabulary_id,
                     conceptClass: row.concept_class_id,
-                    standardConcept: row.standard_concept
+                    standardConcept: row.standard_concept,
+                    conceptCode: row.concept_code
                 }
             }))
 
